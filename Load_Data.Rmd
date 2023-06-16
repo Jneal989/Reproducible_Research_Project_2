@@ -14,16 +14,16 @@ options(scipen = 10)
 
 [Place Holder Text Here]
 
-```{r cars}
-summary(cars)
-```
-
 ## Data Processing
 
 [Place Holder Test and R Code Here]
 
-```{r pressure}
-plot(pressure)
+```{r File Processing}
+library(dplyr)
+download.file('https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2','./StormData.csv.bz2')
+Raw_StormData <- read.csv("StormData.csv.bz2")
+HealthData <- Raw_StormData %<% select(STATE, COUNTYNAME, EVTYPE, FATALITIES, INJURIES)
+EconData <- Raw_StormData %<% select(STATE, COUNTYNAME, EVTYPE, PROPDMG, PROPDMGEXP, CROPDMG, CROPDMGEXP)
 ```
 
 ##Results
