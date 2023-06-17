@@ -2,12 +2,15 @@
 title: 'Reproducible Research Project 2: NOAA Storm Analysis'
 author: "Justin Neal"
 date: "2023-06-13"
-output: html_document
+output: 
+  html_document: 
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen = 10)
+library(c(dplyr, ggplot2))
 ```
 
 ## Summary Findings
@@ -19,13 +22,13 @@ options(scipen = 10)
 [Place Holder Test and R Code Here]
 
 ```{r File Processing}
-library(dplyr)
 download.file('https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2','./StormData.csv.bz2')
 Raw_StormData <- read.csv("StormData.csv.bz2")
-HealthData <- Raw_StormData %>% select(STATE, COUNTYNAME, EVTYPE, FATALITIES, INJURIES)
-EconData <- Raw_StormData %>% select(STATE, COUNTYNAME, EVTYPE, PROPDMG, PROPDMGEXP, CROPDMG, CROPDMGEXP)
-EconData <- EconData %>% mutate(across(STATE:EVTYPE, as.factor))
- EconData <- EconData %>% mutate(as.factor(PROPDMGEXP))
+Raw_StormData <- Raw_StormData %>% mutate(EVTYPE = trimws(EVTYPE))
+Raw_StormData <- Raw_StormData %>% group_by(EVTYPE)
+EvTypes <- summarise(Raw_StormData)
+HealthData <- Raw_StormData %>% select(STATE, EVTYPE, FATALITIES, INJURIES)
+EconData <- Raw_StormData %>% select(STATE, EVTYPE, PROPDMG, PROPDMGEXP, CROPDMG, CROPDMGEXP)
 ```
 
 ##Results
