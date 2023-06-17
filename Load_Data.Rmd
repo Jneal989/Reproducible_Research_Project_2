@@ -10,7 +10,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen = 10)
-library(c(dplyr, ggplot2))
+library(dplyr)
+library(ggplot2)
 ```
 
 ## Summary Findings
