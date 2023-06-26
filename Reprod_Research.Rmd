@@ -1,43 +1,52 @@
 ---
 title: "RR Project 2"
-output: html_document
+output: 
+  html_document: 
+    keep_md: yes
 date: "2023-06-19"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 ```
 
 ## Data Processing
 
-First we download the data as a compressed csv file using the bz2 compression and load it into the globale environment. This code block and following code blocks in the data processing section will cache the data to improve the processing. 
+First we download the data as a compressed csv file using the bz2 compression and load it into the globale environment. This code block and following code blocks in the data processing section will cache the data to improve the processing.
 
 ```{r Loading Data, cache=TRUE}
 # Download and load csv file into Environment
-library(dplyr, warn.conflicts = FALSE)
 download.file('https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2','./StormData.csv.bz2')
 rdt <- read.csv('StormData.csv.bz2')
 ```
 
 Next we will subset the data into only the portion that we need and check for classification errors in the event types that will signifigantly impact our ability to provide a complete analysis of the data.
+
 ```{r Data Subset and Cleaning, cache= TRUE}
 subset_dt <- rdt %>% select(STATE, EVTYPE, PROPDMG, PROPDMGEXP, CROPDMG, CROPDMGEXP, FATALITIES, INJURIES)
 subset_dt <- subset_dt %>% mutate(EVTYPE = trimws(EVTYPE))
 subset_dt <- subset_dt %>% mutate(EVTYPE = as.factor(tolower(EVTYPE)))
-subset_dt <- subset_dt %>% mutate(EVTYPE = gsub("tstm wind","thunderstorm wind",EVTYPE))
-
-# True_et data classifications taken from the NSW publication on the preperation of data.
+# True_et data classifications taken from the NWS publication on the preperation of data.
 True_et <- tibble( EVTYPE = c("astronomical low tide", "avalanche", "blizzard", "coastal flood", "cold/wind chill", "debris flow","dense fog",'dense smoke', "drought", "dust devil", "dust storm", "excessive heat", "extreme cold/wind chill", "flash flood", "flood", "freezing fog", "frost/freeze", "funnel cloud","hail", "heat", "heavy rain", "heavy snow", "high surf", "high wind", "hurricane/typhoon", "ice storm", "lakeshore flood", "lake-effect snow", "lightning", "marine hail", "marine high wind", "marine strong wind", "marine thunderstorm wind", "rip current", "seiche", "sleet", "storm tide","strong wind", "thunderstorm wind", "tornado", "tropical depression", "tropical storm","tsunami", "volcanic ash", "waterspout", "wildfire", "winter storm", "winter weather"))
-
-working_dt <- inner_join(True_et,subset_dt, by = "EVTYPE")
+lost_dt <- anti_join(subset_dt,True_et)
+iworking_dt <- inner_join(True_et,subset_dt, by = "EVTYPE")
+let <- lost_dt %>% count(EVTYPE)
+obs_per <- paste0(as.character(round((nrow(iworking_dt)/nrow(subset_dt))*100, digits = 2)),"%")
+let <- let %>% arrange(desc(n))
+top <- head(let)
 ```
+
+Using the event type classifications from the NWS publication to filter out all the matching events, only `r obs_per` of the observations remain. We can view the Lost Event Types table (let) to see the top mis-classifications and use this information below to edit the subset data.
+`r top`
+
+Contains the code to correct the mis-classification errors to ensure that a higher percentage of the data analysis does not miss any weather event types. 
+```{r Data Correction}
+subset_dt <- subset_dt %>% mutate(EVTYPE = gsub("tstm wind","thunderstorm wind",EVTYPE))
+working_dt <- inner_join(True_et,subset_dt, by = "EVTYPE")
+obs_per2 <- paste0(as.character(round((nrow(working_dt)/nrow(subset_dt))*100, digits = 2)),"%")
+```
+By Calculating the number of observations in our new working data and compared to the raw data subset after the correction of the #1 data mis-classification, we now have `r obs_per2`of the data observations to work with.
 
 ## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
