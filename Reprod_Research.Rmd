@@ -1,5 +1,5 @@
 ---
-title: "RR Project 2"
+title: "Storm Data Analysis"
 output: 
   html_document: 
     keep_md: yes
@@ -12,8 +12,8 @@ library(dplyr)
 library(ggplot2)
 library(scales)
 ```
-## Results
-Based on an initial analysis of the data in aggregate it was determined that flood events had a total of `r Flood_EconImpact` in dollars of combined property and crop damage; while tornadoes had `r Tornado_HealthImpact` in combined injuries and fatalities. These two weather events were the events that had signifigant impacts on their respective areas while each only accounting for less than 10% of the total observations in the data. 
+## Summary
+Based on an initial analysis of the data in aggregate it was determined that flood events had a total of $150,319,678,250 of combined property and crop damage; while tornadoes had 96,979 in combined injuries and fatalities. These two weather events were the events that had signifigant impacts on their respective areas while each only accounting for less than 10% of the total observations in the data. 
 
 ## Data Processing
 
@@ -73,7 +73,7 @@ working_dt$CROPDMGEXP<-ifelse(working_dt$CROPDMGEXP %in% c("m","M"), "1000000", 
 working_dt <- working_dt %>% mutate(PropCalc = PROPDMG * as.numeric(PROPDMGEXP), CropCalc = CROPDMG * as.numeric(CROPDMGEXP))
 ```
 Above we have transformed the CROPDMGEXP and PROPDMGEXP into numeric values to be used as orders of magnitude then multiplied them by the Crop and Property damage numerics stored in their relevant observations.  
-## Data Analysis
+## Results
 
 ```{r creating the summary table and health impact}
 analysis_dt <- working_dt %>% group_by(EVTYPE) %>% summarise(Total_Fatal = sum(FATALITIES, na.rm = TRUE), Total_Injuries = sum(INJURIES, na.rm = TRUE), Total_PropDMG = sum(PropCalc,na.rm = TRUE), Total_CropDMG = sum(CropCalc,na.rm = TRUE),ECount = n())
